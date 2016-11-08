@@ -39,8 +39,8 @@ public class GetUserTask extends AsyncTask<Void, Void, User> {
             connection.connect();
 
             int responseCode = connection.getResponseCode();
-            boolean isSuccessful = responseCode >= 200 && responseCode < 300;
-            if (!isSuccessful) {
+            boolean successful = responseCode >= 200 && responseCode < 300;
+            if (!successful) {
                 throw new IOException("Unexpected code " + responseCode);
             }
 
