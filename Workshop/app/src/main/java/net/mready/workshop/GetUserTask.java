@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-class GetUserTask extends AsyncTask<Void, Void, User> {
+public class GetUserTask extends AsyncTask<Void, Void, User> {
 
     private static final String LOG_TAG = GetUserTask.class.getName();
 
