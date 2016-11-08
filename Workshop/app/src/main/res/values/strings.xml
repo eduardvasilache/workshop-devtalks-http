@@ -1,4 +1,11 @@
 <resources>
-    <string name="app_name">Demo</string>
-    <string name="btn_press">Press me</string>
+
+    <string name="app_name">Workshop</string>
+
+    <string name="instructions">Tap the button below to make a network request</string>
+    <string name="make_request">Make request</string>
+    <string name="loading">Please wait…</string>
+    <string name="error_network_unavailable">No network connection available</string>
+    <string name="error_unknown">An error occurred</string>
+
 </resources>

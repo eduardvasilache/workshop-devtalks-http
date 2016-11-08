@@ -1,3 +1,6 @@
 <resources>
-    <dimen name="activity_margin">16dp</dimen>
+
+    <dimen name="padding_full">24dp</dimen>
+    <dimen name="padding_half">12dp</dimen>
+
 </resources>
