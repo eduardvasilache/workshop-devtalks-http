@@ -77,19 +77,19 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
 
                 Repository repository = new Repository();
 
-                final String keyName = "full_name";
-                if (repositoryJsonObject.has(keyName)) {
-                    repository.setFullName(repositoryJsonObject.getString(keyName));
+                final String keyFullName = "full_name";
+                if (repositoryJsonObject.has(keyFullName)) {
+                    repository.setFullName(repositoryJsonObject.getString(keyFullName));
                 }
 
-                final String keyEmail = "description";
-                if (repositoryJsonObject.has(keyEmail)) {
-                    repository.setDescription(repositoryJsonObject.getString(keyEmail));
+                final String keyDescription = "description";
+                if (repositoryJsonObject.has(keyDescription)) {
+                    repository.setDescription(repositoryJsonObject.getString(keyDescription));
                 }
 
-                final String keyCompany = "html_url";
-                if (repositoryJsonObject.has(keyCompany)) {
-                    repository.setUrl(repositoryJsonObject.getString(keyCompany));
+                final String keyUrl = "html_url";
+                if (repositoryJsonObject.has(keyUrl)) {
+                    repository.setUrl(repositoryJsonObject.getString(keyUrl));
                 }
 
                 repositories.add(repository);
