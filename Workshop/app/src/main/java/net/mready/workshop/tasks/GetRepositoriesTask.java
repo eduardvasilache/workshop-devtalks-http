@@ -9,14 +9,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>> {
 
@@ -24,53 +24,38 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
 
     private static final String BASE_URL = "https://api.github.com/search/repositories";
 
+    private final OkHttpClient okHttpClient;
     private final String url;
 
     public GetRepositoriesTask(String searchQuery) {
-        this.url = BASE_URL + "?q=" + searchQuery + "&per_page=30";
+        url = BASE_URL + "?q=" + searchQuery + "&per_page=30";
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS);
+
+        okHttpClient = builder.build();
     }
 
     @Override
     protected List<Repository> doInBackground(Void... voids) {
-        InputStream inputStream = null;
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
         try {
-            URL url = new URL(this.url);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(3 * 1000);
-            connection.setReadTimeout(3 * 1000);
-            connection.setDoInput(true);
-
-            connection.connect();
-
-            int responseCode = connection.getResponseCode();
-            boolean successful = responseCode >= 200 && responseCode < 300;
-            if (!successful) {
-                throw new IOException("Unexpected code " + responseCode);
+            Response response = okHttpClient.newCall(request).execute();
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
             }
 
-            inputStream = connection.getInputStream();
-
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-
-            String response = stringBuilder.toString();
-            return parse(response);
+            String responseText = response.body().string();
+            return parse(responseText);
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
         }
     }
 
