@@ -1,5 +1,7 @@
 <resources>
 
-    <string name="ph_response">Response goes here</string>
+    <string name="ph_repository_full_name">bumptech/glide</string>
+    <string name="ph_repository_description">An image loading and caching library for Android focused on smooth scrolling</string>
+    <string name="ph_repository_url">https://github.com/bumptech/glide</string>
 
 </resources>

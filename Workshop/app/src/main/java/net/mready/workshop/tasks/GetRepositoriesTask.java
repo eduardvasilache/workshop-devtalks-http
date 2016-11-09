@@ -1,8 +1,11 @@
-package net.mready.workshop;
+package net.mready.workshop.tasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
+import net.mready.workshop.models.Repository;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,21 +15,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GetUserTask extends AsyncTask<Void, Void, User> {
+public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>> {
 
-    private static final String LOG_TAG = GetUserTask.class.getName();
+    private static final String LOG_TAG = GetRepositoriesTask.class.getName();
 
-    private static final String BASE_URL = "https://api.github.com/users/";
+    private static final String BASE_URL = "https://api.github.com/search/repositories";
 
     private final String url;
 
-    public GetUserTask(String username) {
-        this.url = BASE_URL + username;
+    public GetRepositoriesTask(String searchQuery) {
+        this.url = BASE_URL + "?q=" + searchQuery + "&per_page=30";
     }
 
     @Override
-    protected User doInBackground(Void... voids) {
+    protected List<Repository> doInBackground(Void... voids) {
         InputStream inputStream = null;
         try {
             URL url = new URL(this.url);
@@ -54,7 +59,7 @@ public class GetUserTask extends AsyncTask<Void, Void, User> {
             }
 
             String response = stringBuilder.toString();
-            return parseUser(response);
+            return parse(response);
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
@@ -69,29 +74,40 @@ public class GetUserTask extends AsyncTask<Void, Void, User> {
         }
     }
 
-    private User parseUser(String userJson) {
-        User user = new User();
+    private List<Repository> parse(String json) {
+        List<Repository> repositories = new ArrayList<>();
         try {
-            JSONObject jsonObject = new JSONObject(userJson);
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray jsonArray = jsonObject.getJSONArray("items");
 
-            final String keyName = "name";
-            if (jsonObject.has(keyName)) {
-                user.setName(jsonObject.getString(keyName));
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject repositoryJsonObject = jsonArray.getJSONObject(i);
+
+                Repository repository = new Repository();
+
+                final String keyName = "full_name";
+                if (repositoryJsonObject.has(keyName)) {
+                    repository.setFullName(repositoryJsonObject.getString(keyName));
+                }
+
+                final String keyEmail = "description";
+                if (repositoryJsonObject.has(keyEmail)) {
+                    repository.setDescription(repositoryJsonObject.getString(keyEmail));
+                }
+
+                final String keyCompany = "html_url";
+                if (repositoryJsonObject.has(keyCompany)) {
+                    repository.setUrl(repositoryJsonObject.getString(keyCompany));
+                }
+
+                repositories.add(repository);
             }
 
-            final String keyEmail = "email";
-            if (jsonObject.has(keyEmail)) {
-                user.setEmailAddress(jsonObject.getString(keyEmail));
-            }
-
-            final String keyCompany = "company";
-            if (jsonObject.has(keyCompany)) {
-                user.setCompanyName(jsonObject.getString(keyCompany));
-            }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
         }
-        return user;
+
+        return repositories;
     }
 
 }
