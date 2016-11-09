@@ -1,45 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/et_search_query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/padding_full">
+        android:layout_margin="@dimen/padding_half"
+        android:gravity="left|center_vertical"
+        android:hint="@string/hint"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:textSize="16sp"
+        tools:ignore="RtlHardcoded"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/padding_full"
-            android:gravity="center"
-            android:text="@string/instructions"
-            android:textSize="16sp"/>
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_half"
+        android:layout_marginLeft="@dimen/padding_half"
+        android:layout_marginRight="@dimen/padding_half"
+        android:background="@drawable/bg_button"
+        android:text="@string/search"
+        android:textColor="@android:color/white"/>
 
-        <Button
-            android:id="@+id/btn_request"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_button"
-            android:text="@string/make_request"
-            android:textColor="@android:color/white"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_repository"/>
 
-        <TextView
-            android:id="@+id/tv_result"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:background="#f0f0f0"
-            android:padding="@dimen/padding_half"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:text="@string/ph_response"
-            tools:visibility="visible"/>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

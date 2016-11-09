@@ -1,4 +1,4 @@
-package net.mready.workshop;
+package net.mready.workshop.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

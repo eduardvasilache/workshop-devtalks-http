@@ -2,8 +2,8 @@
 
     <string name="app_name">Workshop</string>
 
-    <string name="instructions">Tap the button below to make a network request</string>
-    <string name="make_request">Make request</string>
+    <string name="hint">Enter your search query here</string>
+    <string name="search">Search</string>
     <string name="loading">Please wait…</string>
     <string name="error_network_unavailable">No network connection available</string>
     <string name="error_unknown">An error occurred</string>
