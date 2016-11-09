@@ -6,12 +6,12 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 class GetUserTask extends AsyncTask<Void, Void, User> {
 
@@ -19,38 +19,46 @@ class GetUserTask extends AsyncTask<Void, Void, User> {
 
     private static final String BASE_URL = "https://api.github.com/users/";
 
-    private final OkHttpClient okHttpClient;
     private final String url;
 
     public GetUserTask(String username) {
         this.url = BASE_URL + username;
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS);
-
-        okHttpClient = builder.build();
     }
 
     @Override
     protected User doInBackground(Void... voids) {
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
+        InputStream inputStream = null;
         try {
-            Response response = okHttpClient.newCall(request).execute();
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
+            URL url = new URL(this.url);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(3 * 1000);
+            connection.setReadTimeout(3 * 1000);
+            connection.setDoInput(true);
+
+            connection.connect();
+            inputStream = connection.getInputStream();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
             }
 
-            String responseText = response.body().string();
-            return parseUser(responseText);
+            String response = stringBuilder.toString();
+            return parseUser(response);
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
         }
     }
 
