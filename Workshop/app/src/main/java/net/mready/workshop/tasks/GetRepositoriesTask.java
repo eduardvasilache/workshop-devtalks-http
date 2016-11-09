@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -25,10 +26,10 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
     private static final String BASE_URL = "https://api.github.com/search/repositories";
 
     private final OkHttpClient okHttpClient;
-    private final String url;
+    private final String searchQuery;
 
     public GetRepositoriesTask(String searchQuery) {
-        url = BASE_URL + "?q=" + searchQuery + "&per_page=30";
+        this.searchQuery = searchQuery;
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
@@ -40,8 +41,14 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
 
     @Override
     protected List<Repository> doInBackground(Void... voids) {
+        HttpUrl httpUrl = HttpUrl.parse(BASE_URL)
+                .newBuilder()
+                .addQueryParameter("q", searchQuery)
+                .addQueryParameter("per_page", "30")
+                .build();
+
         Request request = new Request.Builder()
-                .url(url)
+                .url(httpUrl)
                 .get()
                 .build();
 
