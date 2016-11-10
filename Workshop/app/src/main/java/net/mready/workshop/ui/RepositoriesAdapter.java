@@ -1,4 +1,4 @@
-package net.mready.workshop.ui.adapters;
+package net.mready.workshop.ui;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
