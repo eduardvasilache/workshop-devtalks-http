@@ -1,4 +1,4 @@
-package net.mready.workshop.tasks;
+package net.mready.workshop.api;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -70,31 +70,34 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
         List<Repository> repositories = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(json);
-            JSONArray jsonArray = jsonObject.getJSONArray("items");
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject repositoryJsonObject = jsonArray.getJSONObject(i);
+            final String keyItems = "items";
+            if (jsonObject.has(keyItems)) {
+                JSONArray jsonArray = jsonObject.getJSONArray(keyItems);
 
-                Repository repository = new Repository();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject repositoryJsonObject = jsonArray.getJSONObject(i);
 
-                final String keyFullName = "full_name";
-                if (repositoryJsonObject.has(keyFullName)) {
-                    repository.setFullName(repositoryJsonObject.getString(keyFullName));
+                    Repository repository = new Repository();
+
+                    final String keyFullName = "full_name";
+                    if (repositoryJsonObject.has(keyFullName)) {
+                        repository.setFullName(repositoryJsonObject.getString(keyFullName));
+                    }
+
+                    final String keyDescription = "description";
+                    if (repositoryJsonObject.has(keyDescription)) {
+                        repository.setDescription(repositoryJsonObject.getString(keyDescription));
+                    }
+
+                    final String keyUrl = "html_url";
+                    if (repositoryJsonObject.has(keyUrl)) {
+                        repository.setUrl(repositoryJsonObject.getString(keyUrl));
+                    }
+
+                    repositories.add(repository);
                 }
-
-                final String keyDescription = "description";
-                if (repositoryJsonObject.has(keyDescription)) {
-                    repository.setDescription(repositoryJsonObject.getString(keyDescription));
-                }
-
-                final String keyUrl = "html_url";
-                if (repositoryJsonObject.has(keyUrl)) {
-                    repository.setUrl(repositoryJsonObject.getString(keyUrl));
-                }
-
-                repositories.add(repository);
             }
-
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
         }

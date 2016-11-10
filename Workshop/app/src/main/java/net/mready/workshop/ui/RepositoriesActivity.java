@@ -18,13 +18,12 @@ import android.widget.Toast;
 
 import net.mready.workshop.R;
 import net.mready.workshop.models.Repository;
-import net.mready.workshop.tasks.GetRepositoriesTask;
-import net.mready.workshop.ui.adapters.RepositoriesAdapter;
+import net.mready.workshop.api.GetRepositoriesTask;
 import net.mready.workshop.utils.NetworkUtils;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class RepositoriesActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
     private RepositoriesAdapter repositoriesAdapter;
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    search(etSearchQuery.getText().toString());
+                    onSearchClicked(etSearchQuery.getText().toString());
                     return true;
                 }
                 return false;
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search(etSearchQuery.getText().toString());
+                onSearchClicked(etSearchQuery.getText().toString());
             }
         });
     }
@@ -72,32 +71,19 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void search(String query) {
+    private void onSearchClicked(String query) {
         closeKeyboard();
 
         if (NetworkUtils.hasNetworkConnection(this)) {
-            displayProgressDialog(true);
-            new GetRepositoriesTask(query) {
-                @Override
-                protected void onPostExecute(List<Repository> repositories) {
-                    displayProgressDialog(false);
-                    if (repositories != null) {
-                        if (repositoriesAdapter != null) {
-                            repositoriesAdapter.setRepositories(repositories);
-                        }
-                    } else {
-                        displayToast(getString(R.string.error_unknown));
-                    }
-                }
-            }.execute();
+            search(query);
         } else {
             displayToast(getString(R.string.error_network_unavailable));
         }
     }
 
-    private void displayProgressDialog(boolean shouldDisplay) {
+    private void setLoading(boolean loading) {
         if (progressDialog != null) {
-            if (shouldDisplay) {
+            if (loading) {
                 progressDialog.setMessage(getString(R.string.loading));
                 progressDialog.setCancelable(false);
                 progressDialog.show();
@@ -114,6 +100,23 @@ public class MainActivity extends AppCompatActivity {
     private void closeKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+    }
+
+    private void search(String query) {
+        setLoading(true);
+        new GetRepositoriesTask(query) {
+            @Override
+            protected void onPostExecute(List<Repository> repositories) {
+                setLoading(false);
+                if (repositories != null) {
+                    if (repositoriesAdapter != null) {
+                        repositoriesAdapter.setRepositories(repositories);
+                    }
+                } else {
+                    displayToast(getString(R.string.error_unknown));
+                }
+            }
+        }.execute();
     }
 
 }
