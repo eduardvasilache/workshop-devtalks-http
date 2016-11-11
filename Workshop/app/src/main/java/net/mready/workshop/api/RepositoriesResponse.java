@@ -7,7 +7,7 @@ import net.mready.workshop.models.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RepositoriesResponseWrapper {
+class RepositoriesResponse {
 
     @SerializedName("total_count")
     private int totalItemCount;
@@ -15,7 +15,7 @@ public class RepositoriesResponseWrapper {
     @SerializedName("items")
     private List<Repository> repositories;
 
-    public RepositoriesResponseWrapper() {
+    public RepositoriesResponse() {
         repositories = new ArrayList<>();
     }
 
