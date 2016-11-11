@@ -3,14 +3,13 @@ package net.mready.workshop.api;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+
 import net.mready.workshop.models.Repository;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -26,17 +25,20 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
     private static final String BASE_URL = "https://api.github.com/search/repositories";
 
     private final OkHttpClient okHttpClient;
+    private final Gson gson;
     private final String searchQuery;
 
     public GetRepositoriesTask(String searchQuery) {
         this.searchQuery = searchQuery;
 
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+        OkHttpClient.Builder okHttpBuilder = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(5, TimeUnit.SECONDS);
+        okHttpClient = okHttpBuilder.build();
 
-        okHttpClient = builder.build();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gson = gsonBuilder.create();
     }
 
     @Override
@@ -55,54 +57,26 @@ public class GetRepositoriesTask extends AsyncTask<Void, Void, List<Repository>>
         try {
             Response response = okHttpClient.newCall(request).execute();
             if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
+                throw new IOException("Unexpected code " + response.code());
             }
 
             String responseText = response.body().string();
             return parse(responseText);
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
         }
     }
 
-    private List<Repository> parse(String json) {
-        List<Repository> repositories = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(json);
+    private List<Repository> parse(String json) throws JsonSyntaxException {
+        RepositoriesResponseWrapper response =
+                gson.fromJson(json, RepositoriesResponseWrapper.class);
 
-            final String keyItems = "items";
-            if (jsonObject.has(keyItems)) {
-                JSONArray jsonArray = jsonObject.getJSONArray(keyItems);
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject repositoryJsonObject = jsonArray.getJSONObject(i);
-
-                    Repository repository = new Repository();
-
-                    final String keyFullName = "full_name";
-                    if (repositoryJsonObject.has(keyFullName)) {
-                        repository.setFullName(repositoryJsonObject.getString(keyFullName));
-                    }
-
-                    final String keyDescription = "description";
-                    if (repositoryJsonObject.has(keyDescription)) {
-                        repository.setDescription(repositoryJsonObject.getString(keyDescription));
-                    }
-
-                    final String keyUrl = "html_url";
-                    if (repositoryJsonObject.has(keyUrl)) {
-                        repository.setUrl(repositoryJsonObject.getString(keyUrl));
-                    }
-
-                    repositories.add(repository);
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage());
+        if (response == null) {
+            throw new JsonSyntaxException("Invalid JSON syntax");
         }
 
-        return repositories;
+        return response.getRepositories();
     }
 
 }
