@@ -17,14 +17,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import net.mready.workshop.R;
+import net.mready.workshop.api.GitHubApi;
 import net.mready.workshop.models.Repository;
-import net.mready.workshop.api.GetRepositoriesTask;
 import net.mready.workshop.utils.NetworkUtils;
 
 import java.util.List;
 
 public class RepositoriesActivity extends AppCompatActivity {
 
+    private GitHubApi gitHubApi;
     private ProgressDialog progressDialog;
     private RepositoriesAdapter repositoriesAdapter;
 
@@ -32,6 +33,8 @@ public class RepositoriesActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        gitHubApi = new GitHubApi();
 
         final EditText etSearchQuery = (EditText) findViewById(R.id.et_search_query);
         final Button btnSearch = (Button) findViewById(R.id.btn_search);
@@ -104,19 +107,23 @@ public class RepositoriesActivity extends AppCompatActivity {
 
     private void search(String query) {
         setLoading(true);
-        new GetRepositoriesTask(query) {
+        gitHubApi.getRepositories(query, new GitHubApi.ResponseCallback<List<Repository>>() {
             @Override
-            protected void onPostExecute(List<Repository> repositories) {
+            public void onSuccess(List<Repository> repositories) {
                 setLoading(false);
                 if (repositories != null) {
                     if (repositoriesAdapter != null) {
                         repositoriesAdapter.setRepositories(repositories);
                     }
-                } else {
-                    displayToast(getString(R.string.error_unknown));
                 }
             }
-        }.execute();
+
+            @Override
+            public void onError(String message) {
+                setLoading(false);
+                displayToast(getString(R.string.error_unknown));
+            }
+        });
     }
 
 }
