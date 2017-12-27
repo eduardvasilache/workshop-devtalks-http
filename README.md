@@ -1,6 +1,6 @@
 # A modern approach to using RESTful APIs in Android applications
 
-Android Workshop @ DevTalks for Juniors 2016  
+Android Workshop @ DevTalks for Juniors  
 November 12, 2016  
 Bucharest, Romania  
 
